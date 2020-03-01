@@ -29,7 +29,7 @@
       </ul>
     </section>
 
-    <button @click="makeDecision()" v-if="!decided">Decide</button>
+    <button @click="makeDecision" v-if="!decided">Decide</button>
   </div>
 </template>
 
