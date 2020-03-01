@@ -68,10 +68,10 @@ export default {
         .get()
         .then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {
-            // doc.data() is never undefined for query doc snapshots
-            // console.log(doc.id, " => ", doc.data());
-            self.decided = true;
-            self.decision = doc.data().data;
+            if (!_.isEmpty(doc.data().data)) {
+              self.decided = true;
+              self.decision = doc.data().data;
+            }
           });
         });
     },
