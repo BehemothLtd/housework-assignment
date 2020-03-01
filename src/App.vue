@@ -15,7 +15,7 @@
       </div>
     </section>
     <section v-else>
-      <h1>{{ new Date().toJSON().slice(0,10).replace(/-/g,'/') }} Fate:</h1>
+      <h1>{{ date }} Fate:</h1>
       <ul>
         <li v-for="(value, name) in decision" :key="name">
           <h3>
@@ -36,7 +36,7 @@
 <script>
 import _ from "lodash";
 
-import { db } from '@/firebase';
+import { db } from "@/firebase";
 
 export default {
   name: "App",
@@ -45,14 +45,36 @@ export default {
       works: [],
       users: [],
       decided: false,
-      decision: []
+      decision: [],
+      date: new Date()
+        .toJSON()
+        .slice(0, 10)
+        .replace(/-/g, "/")
     };
   },
+  created: function() {
+    this.checkTodayDecision();
+  },
   firestore: {
-    users: db.collection('users'),
-    works: db.collection('works') 
+    users: db.collection("users"),
+    works: db.collection("works"),
+    decisions: db.collection("decisions")
   },
   methods: {
+    checkTodayDecision: function() {
+      let self = this;
+      this.$firestoreRefs.decisions
+        .where("date", "==", this.date)
+        .get()
+        .then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            // doc.data() is never undefined for query doc snapshots
+            // console.log(doc.id, " => ", doc.data());
+            self.decided = true;
+            self.decision = doc.data().data;
+          });
+        });
+    },
     suffle: function(array) {
       let m = array.length,
         t,
@@ -100,6 +122,11 @@ export default {
 
       this.decision = _.groupBy(decision, "users");
       this.decided = true;
+
+      this.$firestoreRefs.decisions.add({
+        date: this.date,
+        data: this.decision
+      });
     }
   }
 };
